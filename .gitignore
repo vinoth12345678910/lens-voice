@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+venv/
+.env
+*.pt
+best.pt
+*.onnx
+*.tflite
+!app/assets/models/best.tflite
+
+# Flutter
+app/build/
+app/.dart_tool/
+app/.packages
+app/.pub/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/pubspec.lock
+app/ios/Pods/
+app/ios/.symlinks/
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+app/android/app/build/
+app/android/captures/
+app/.idea/
+
+# macOS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Test outputs
+*.wav
+test.png
+runs/
+datasets/
+
+idd-1

@@ -1,0 +1,29 @@
+name: lensvoice
+description: An on-device AI assistant for visually impaired users.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.2.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.11.0+1
+  tflite_flutter: ^0.11.0
+  image: ^4.5.3
+  http: ^1.2.2
+  just_audio: ^0.9.39
+  path_provider: ^2.1.6
+  shared_preferences: ^2.3.3
+  flutter_tts: ^4.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/best.tflite
