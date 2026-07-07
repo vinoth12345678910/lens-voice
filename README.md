@@ -1,19 +1,29 @@
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:00c6ff,100:0072ff&height=200&section=header&text=LensVoice&fontSize=60&fontColor=fff&animation=fadeIn">
-  <img alt="LensVoice Banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:00c6ff,100:0072ff&height=200&section=header&text=LensVoice&fontSize=60&fontColor=fff&animation=fadeIn">
+  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:00c6ff,100:0072ff&height=220&section=header&text=LensVoice&fontSize=60&fontColor=fff&animation=fadeIn&fontAlignY=38">
+  <img alt="LensVoice Banner" src="https://capsule-render.vercel.app/api?type=waving&color=0:00c6ff,100:0072ff&height=220&section=header&text=LensVoice&fontSize=60&fontColor=fff&animation=fadeIn&fontAlignY=38">
 </picture>
 
 <p align="center">
-  <strong>AI-Powered Spatial Awareness for the Visually Impaired</strong><br>
-  <em>See the world through sound — on-device, real-time, in your language.</em>
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2500&pause=800&color=00C6FF&center=true&vCenter=true&width=650&lines=See+the+world+through+sound.;On-device.+Real-time.+In+your+language.;Zero+backend.+One+APK.+No+excuses." alt="Typing SVG" />
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter&logoColor=white"/>
+  <img src="https://img.shields.io/badge/on--device-100%25-00c6ff?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/languages-EN%20%7C%20TA%20%7C%20HI-0072ff?style=for-the-badge"/>
 </p>
 
 <p align="center">
   <a href="#-the-problem"><img src="https://img.shields.io/badge/🧠-Why-0072ff?style=for-the-badge"/></a>
   <a href="#-architecture"><img src="https://img.shields.io/badge/⚙️-Architecture-00c6ff?style=for-the-badge"/></a>
   <a href="#-the-model"><img src="https://img.shields.io/badge/📊-Model-0072ff?style=for-the-badge"/></a>
-  <a href="#-build"><img src="https://img.shields.io/badge/📱-APK-00c6ff?style=for-the-badge"/></a>
+  <a href="#-build--run"><img src="https://img.shields.io/badge/📱-APK-00c6ff?style=for-the-badge"/></a>
   <a href="#-tech-stack"><img src="https://img.shields.io/badge/🔥-Stack-0072ff?style=for-the-badge"/></a>
+</p>
+
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=vinoth12345678910&label=Repo+Views&color=0072ff&style=flat-square" alt="views"/>
 </p>
 
 ---
@@ -35,11 +45,11 @@ Existing solutions are either:
 
 ## 🎯 The Vision
 
-This is not a "research demo." This is the software layer for the next generation of **AI-assisted wearable glasses** — think Meta Ray-Ban, but purpose-built for accessibility. The architecture is designed from day one to be:
+This is not a "research demo." This is a working proof that the software layer for the next generation of **AI-assisted accessibility wearables** doesn't need a data center behind it.
 
-- **Glasses-ready:** The on-device pipeline (TFLite → Tracker → Urgency → TTS) runs at ~2fps on a phone. On dedicated glasses hardware with a lightweight NPU, it runs in real-time.
-- **Language-native:** English, Tamil, Hindi at launch. Not gating accessibility behind English literacy.
-- **Privately yours:** Zero cloud. Zero backend. Zero images leave the device. The only internet call is for voice synthesis, and that's optional (works offline with pre-cached voices).
+- **Glasses-ready architecture:** the same on-device pipeline (TFLite → Tracker → Urgency → TTS) that runs on a phone today is the exact pipeline dedicated glasses hardware with an NPU would run tomorrow — no redesign needed, just a smaller camera.
+- **Language-native:** English, Tamil, Hindi at launch, powered by Sarvam AI's Indian-language-first models. Not gating accessibility behind English literacy.
+- **Privately yours:** no backend server, no images ever leave the device. The only network call is to Sarvam for translation + speech synthesis.
 
 > **"If a visually impaired person can't afford $3,000 smart glasses, their phone + LensVoice should be enough."**
 
@@ -47,62 +57,44 @@ This is not a "research demo." This is the software layer for the next generatio
 
 ## 🏗️ Architecture
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  📱 LensVoice APK (100% On-Device)                       │
-│                                                          │
-│  Camera Frame (2 fps)                                    │
-│     ↓                                                    │
-│  ┌─────────────────────────────┐                         │
-│  │  YOLOv6n TFLite (512×512)   │ ← best.tflite (9.4MB)  │
-│  │  Confidence ≥ 0.25, NMS     │                         │
-│  └─────────────┬───────────────┘                         │
-│                ↓                                         │
-│  ┌─────────────────────────────┐                         │
-│  │  Tracker (IoU + Centroid)   │ • Object persistence     │
-│  │                              │ • Motion classification │
-│  │                              │   (approaching/receding)│
-│  └─────────────┬───────────────┘                         │
-│                ↓                                         │
-│  ┌─────────────────────────────┐                         │
-│  │  Urgency Classifier         │ • HAZARD: vehicles       │
-│  │                              │   approaching, close    │
-│  │                              │   persons              │
-│  │                              │ • INFO: everything else │
-│  └─────────────┬───────────────┘                         │
-│          ┌─────┴─────┐                                   │
-│       HAZARD       INFO                                   │
-│          │           │                                    │
-│          ↓           ↓                                    │
-│  ┌────────────┐  ┌──────────────┐                        │
-│  │ Immediate   │  │ Change       │                        │
-│  │ Announce    │  │ Detector     │ ← dedup (no spam)     │
-│  └──────┬─────┘  └──────┬───────┘                        │
-│         └───────┬───────┘                                │
-│                 ↓                                         │
-│  ┌─────────────────────────────┐                         │
-│  │  Description Generator       │ • "Car approaching      │
-│  │                              │   from your left"      │
-│  └─────────────┬───────────────┘                         │
-│                ↓                                         │
-│  ┌─────────────────────────────┐                         │
-│  │  Sarvam AI                  │ • Translate + TTS        │
-│  │  (en-IN/ta-IN/hi-IN)        │ • Hazard interrupts     │
-│  │                              │ • Queue for INFO       │
-│  └─────────────┬───────────────┘                         │
-│                ↓                                         │
-│  ┌─────────────────────────────┐                         │
-│  │  🔊 Audio + Haptic          │ • Spoken announcement   │
-│  │                              │ • Heavy pulse on hazard │
-│  └─────────────────────────────┘                         │
-└──────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["📷 Camera Frame — ~2 fps"] --> B["🧠 YOLO26n · TFLite int8<br/>320×320 · on-device"]
+    B --> C["🎯 Tracker<br/>IoU + Centroid-distance matching<br/>Motion: approaching / receding / static"]
+    C --> D{"⚖️ Urgency Classifier"}
+    D -->|HAZARD| E["🚨 Immediate Announce<br/>bypasses dedup, interrupts"]
+    D -->|INFO| F["🔁 Change Detector<br/>dedup — only speaks on real change"]
+    E --> G["📝 Description Generator"]
+    F --> G
+    G --> H["🌐 Sarvam AI<br/>Translate + Bulbul TTS<br/>en-IN / ta-IN / hi-IN"]
+    H --> I["🔊 Audio + Haptic Pulse"]
+
+    style B fill:#00c6ff,color:#000
+    style D fill:#0072ff,color:#fff
+    style E fill:#ff4d4d,color:#fff
+    style H fill:#00c6ff,color:#000
 ```
 
 **Key design decisions:**
-- **No backend.** The app is fully self-contained. YOLO inference runs on-device via `tflite_flutter` (TFLite int8 quantized). The only internet dependency is Sarvam AI for translation + TTS.
-- **Hazards interrupt.** Info announcements queue. If a car is approaching while the app is describing a traffic sign, *the car wins* — urgency is not up for debate.
-- **Change detection prevents spam.** The `ChangeDetector` remembers what was last said about each object class and only re-announces if position/distance changes meaningfully.
-- **Tracker uses centroid fallback**, not just IoU. When a car moves fast between frames and bounding boxes barely overlap, the centroid-distance heuristic keeps tracking alive. This was a real bug fixed during development on Indian roads.
+- **No backend.** The app is fully self-contained — YOLO inference runs on-device via `tflite_flutter`. The only internet dependency is Sarvam AI for translation + TTS.
+- **Hazards interrupt.** Info announcements queue. If a car is approaching while the app is mid-sentence about a traffic sign, *the car wins* — urgency is not up for debate.
+- **Change detection prevents spam.** The `ChangeDetector` remembers what was last said about each object and only re-announces if position or distance changes meaningfully.
+- **Tracker uses centroid fallback, not just IoU.** When an object moves fast between frames and bounding boxes barely overlap, pure IoU-matching loses track of it — a real bug caught and fixed during development. Centroid-distance as a fallback signal keeps tracking stable even on fast-approaching hazards.
+
+<details>
+<summary><strong>🩻 Click to see the on-device inference internals</strong></summary>
+
+<br>
+
+The exported TFLite model outputs a raw, undecoded tensor — `[1, 19, 2100]` (4 box params + 15 class scores × 2100 grid cells), not a convenience-wrapped result. The Dart-side decoder:
+1. Reads `cx, cy, w, h` per grid cell, converts to `x1,y1,x2,y2`
+2. Applies sigmoid + argmax across the 15 class-score rows
+3. Filters by confidence threshold
+4. Runs manual greedy NMS (IoU ≤ 0.5) — since NMS isn't baked into this export
+
+Verified correct by cross-comparing decoded output against the original PyTorch model's predictions on identical test images before shipping.
+
+</details>
 
 ---
 
@@ -110,21 +102,23 @@ This is not a "research demo." This is the software layer for the next generatio
 
 | Detail | Value |
 |---|---|
-| **Architecture** | YOLOv6 Nano (2.5M params) |
-| **Training Data** | Indian Driving Dataset (IDD) — 10,000+ annotated frames |
-| **Training Time** | **11 hours** on Apple M4 GPU |
-| **Classes** | 15 Indian road objects: car, bus, truck, motorcycle, autorickshaw, bicycle, person, rider, traffic light, traffic sign, animal, trailer, caravan, train, vehicle fallback |
-| **Input Size** | 512×512 |
-| **Export Format** | TFLite (int8 quantized, 9.4MB) |
-| **Inference** | ~150-300ms per frame on mid-range Android |
+| **Architecture** | YOLO26 Nano (Ultralytics, 2026 release — NMS-free, edge-first) |
+| **Training Data** | Indian Driving Dataset (IDD), via Roboflow — ~44,000 annotated images, 15 classes |
+| **Training Environment** | Multi-platform: Google Colab (Tesla T4) + Apple M4 (MPS), resumed across sessions |
+| **Classes** | car, bus, truck, motorcycle, autorickshaw, bicycle, person, rider, animal, traffic light, traffic sign, trailer, caravan, train, vehicle fallback |
+| **Export Input Size** | 320×320 |
+| **Export Format** | TFLite, int8 quantized — **2.7 MB** |
+| **Inference** | On-device, real-time on mid-range Android hardware |
 
-### Why YOLOv6 Nano?
+### Why YOLO26n?
 
-Because YOLOv11n is 2× slower on mobile. Because YOLOv8n is 1.5× the model size. YOLOv6 Nano hits the sweet spot between accuracy and latency for a 2fps real-time pipeline on 2024 mid-range phones. The model was trained specifically on **Indian road conditions** — where the distinction between "autorickshaw" and "car" is a life-safety question, not a taxonomy exercise.
+Ultralytics' newest generation, purpose-built for edge and low-power deployment — NMS-free architecture removes a traditionally fragile, hyperparameter-sensitive post-processing step, which matters a lot when you're squeezing inference onto a phone rather than a GPU server.
 
 ### Why IDD?
 
-The original training data. Indian roads are fundamentally different from Western ones: shared lanes, auto-rickshaws, stray animals, informal traffic patterns. A model trained on COCO or Cityscapes fails on Bengaluru's roads. IDD closes that gap.
+Indian roads are fundamentally different from the driving datasets (COCO, Cityscapes) most pretrained models learn from — shared lanes, auto-rickshaws, stray animals, informal traffic patterns. A model trained on Western road imagery misses exactly the object types that matter most here. IDD closes that gap.
+
+> **Honest note on model maturity:** this is a real, working MVP-grade detector — trained end-to-end across multiple sessions and platforms, with every architectural and data-pipeline decision deliberate. It reliably catches large, close, well-lit objects; smaller or distant objects are still a growth area. That's an intentional MVP scope decision, not a hidden flaw — production-grade accuracy would mean more epochs, more data, and a larger model, which is the clearly-scoped next phase, not this one.
 
 ---
 
@@ -135,14 +129,13 @@ The original training data. Indian roads are fundamentally different from Wester
 | Layer | Technology |
 |---|---|
 | **Mobile Framework** | Flutter 3.x + Dart 3.x |
-| **Object Detection** | Ultralytics YOLOv6n → TFLite int8 |
-| **TFLite Runtime** | tflite_flutter 0.11 |
-| **Image Processing** | dart image 4.x |
-| **Translation + TTS** | Sarvam AI API |
-| **Audio Playback** | just_audio 0.9 |
+| **Object Detection** | Ultralytics YOLO26n → TFLite int8 |
+| **TFLite Runtime** | tflite_flutter |
+| **Translation + TTS** | Sarvam AI (Mayura translate + Bulbul v3 TTS) |
+| **Audio Playback** | just_audio |
 | **Persistence** | shared_preferences |
-| **Text-to-Speech (fallback)** | flutter_tts 4.x |
-| **Build Tool** | Gradle + Android SDK 35 |
+| **Accessibility** | Native TalkBack/VoiceOver semantics, haptic hazard alerts |
+| **Build Tool** | Gradle + Android SDK |
 
 </div>
 
@@ -152,42 +145,40 @@ The original training data. Indian roads are fundamentally different from Wester
 
 ### Prerequisites
 - Flutter 3.24+ ([install](https://docs.flutter.dev/get-started/install))
-- Android SDK 35+
-- Sarvam AI API key ([get one free](https://sarvam.ai))
+- Android SDK
+- Sarvam AI API key ([get one](https://sarvam.ai))
 
 ### Clone & Build
 
 ```bash
-# Clone
 git clone https://github.com/vinoth12345678910/lens-voice.git
 cd lens-voice/app
 
-# Install dependencies
 flutter pub get
 
-# Build APK with your API key
 flutter build apk --release --dart-define=SARVAM_API_KEY=your_key_here
 
-# APK location:
-# build/app/outputs/flutter-apk/app-release.apk
+# APK: build/app/outputs/flutter-apk/app-release.apk
 ```
 
-Install the APK on your Android phone. Open it. Grant camera permission. **That's it.** No server, no WiFi pairing, no config.
+Install on your Android phone, open it, grant camera permission. **That's it.** No server, no WiFi pairing, no config.
 
-### Running from Source (Hot Reload)
+### Running from Source
 ```bash
 flutter run --dart-define=SARVAM_API_KEY=your_key_here
 ```
+
+> ⚠️ Never commit your API key. Use `--dart-define` at build time, and rotate any key that's ever been shared or committed.
 
 ---
 
 ## 🧪 Future Roadmap
 
-- **Edge TPU acceleration** — Deploy to Google Coral / MediaTek NPU for glasses form factor
-- **Offline TTS** — Pre-cache Sarvam voices so zero internet needed
-- **Depth estimation** — Add MiDaS or similar for precise distance, not just bounding-box proxies
-- **Hazard tracking** — "Car approaching from left" → "Car now on your left" → "Car passed" — full life-cycle announcements
-- **S wake word** — "Hey Lens" to query what's ahead on demand
+- [ ] **Edge NPU acceleration** — Google Coral / MediaTek NPU delegates for a true glasses form factor
+- [ ] **Offline TTS fallback** — pre-cached voices for zero-connectivity use
+- [ ] **Depth estimation** — monocular depth (MiDaS-class model) for real distance, not bounding-box-size proxies
+- [ ] **Full hazard life-cycle narration** — "approaching" → "passing" → "passed," not single-shot callouts
+- [ ] **Larger model / longer training pass** — a v2 accuracy push once the MVP interaction design is validated
 
 ---
 
@@ -210,3 +201,8 @@ MIT — because accessibility should not be paywalled.
     <img src="https://img.shields.io/github/issues/vinoth12345678910/lens-voice?style=social"/>
   </a>
 </p>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://capsule-render.vercel.app/api?type=waving&color=0:0072ff,100:00c6ff&height=120&section=footer">
+  <img alt="footer" src="https://capsule-render.vercel.app/api?type=waving&color=0:0072ff,100:00c6ff&height=120&section=footer">
+</picture>
