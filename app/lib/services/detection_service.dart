@@ -16,7 +16,7 @@ class DetectionService {
       ValueNotifier(ModelLoadState.notLoaded);
 
   static const int _inputSize = 320;
-  static const double _confThreshold = 0.1;
+  static const double _confThreshold = 0.05;
   static const double _nmsThreshold = 0.5;
 
   bool get isLoaded => loadState.value == ModelLoadState.ready;
