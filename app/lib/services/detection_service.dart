@@ -15,7 +15,7 @@ class DetectionService {
       ValueNotifier(ModelLoadState.notLoaded);
 
   static const int _inputSize = 320;
-  static const double _confThreshold = 0.25;
+  static const double _confThreshold = 0.1;
   static const double _nmsThreshold = 0.5;
 
   bool get isLoaded => loadState.value == ModelLoadState.ready;
@@ -49,8 +49,8 @@ class DetectionService {
       final resized = img.copyResize(image, width: _inputSize, height: _inputSize);
       final input = _imageToFloat32ListNCHW(resized);
 
-      final outputShape = [1, 19, 2100];
-      final output = List<double>.filled(1 * 19 * 2100, 0.0).reshape(outputShape);
+      final outputShape = [1, 300, 6];
+      final output = List<double>.filled(1 * 300 * 6, 0.0).reshape(outputShape);
       _interpreter!.run(input, output);
 
       final typedOutput = output as List<List<List<double>>>;
@@ -82,36 +82,21 @@ class DetectionService {
 
   List<Detection> _parseOutput(List<List<List<double>>> output) {
     final raw = output[0];
-    final numPredictions = raw[0].length;
-
     final boxes = <_Box>[];
 
-    for (int i = 0; i < numPredictions; i++) {
-      final cx = raw[0][i];
-      final cy = raw[1][i];
-      final w = raw[2][i];
-      final h = raw[3][i];
+    for (int i = 0; i < 300; i++) {
+      final x1 = raw[i][0].clamp(0, _inputSize - 1).toDouble();
+      final y1 = raw[i][1].clamp(0, _inputSize - 1).toDouble();
+      final x2 = raw[i][2].clamp(0, _inputSize - 1).toDouble();
+      final y2 = raw[i][3].clamp(0, _inputSize - 1).toDouble();
+      final conf = raw[i][4];
+      final clsId = raw[i][5].round();
 
-      double bestScore = 0;
-      int bestClass = -1;
-      for (int c = 0; c < 15; c++) {
-        final score = raw[4 + c][i];
-        if (score > bestScore) {
-          bestScore = score;
-          bestClass = c;
-        }
-      }
-
-      if (bestScore < _confThreshold || bestClass < 0) continue;
-
-      final x1 = ((cx - w / 2) * _inputSize).clamp(0, _inputSize - 1).toDouble();
-      final y1 = ((cy - h / 2) * _inputSize).clamp(0, _inputSize - 1).toDouble();
-      final x2 = ((cx + w / 2) * _inputSize).clamp(0, _inputSize - 1).toDouble();
-      final y2 = ((cy + h / 2) * _inputSize).clamp(0, _inputSize - 1).toDouble();
+      if (conf < _confThreshold) continue;
 
       boxes.add(_Box(
         x1: x1, y1: y1, x2: x2, y2: y2,
-        score: bestScore, classId: bestClass,
+        score: conf, classId: clsId,
       ));
     }
 
