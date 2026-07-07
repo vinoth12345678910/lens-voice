@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import '../services/audio_service.dart' as audio_svc;
 import '../services/camera_service.dart';
 import '../services/detection_service.dart';
+import '../services/model_download_service.dart';
 import '../services/sarvam_service.dart';
 import '../services/preferences_service.dart';
 import '../pipeline/tracker.dart';
@@ -31,6 +32,7 @@ class _CameraScreenState extends State<CameraScreen>
   final audio_svc.AudioService _audioService = audio_svc.AudioService();
   final CameraService _cameraService = CameraService();
   final DetectionService _detectionService = DetectionService();
+  final ModelDownloadService _modelDownloadService = ModelDownloadService();
   final FlutterTts _tts = FlutterTts();
   final Tracker _tracker = Tracker();
   final ChangeDetector _changeDetector = ChangeDetector();
@@ -45,9 +47,11 @@ class _CameraScreenState extends State<CameraScreen>
   bool _isProcessing = false;
   bool _wasPausedByBackground = false;
   bool _isLoadingModel = false;
+  double _downloadProgress = 0.0;
 
   StreamSubscription? _playerStateSub;
   VoidCallback? _modelLoadListener;
+  VoidCallback? _downloadProgressCallback;
 
   @override
   void initState() {
@@ -106,13 +110,49 @@ class _CameraScreenState extends State<CameraScreen>
       final currentState = _detectionService.loadState.value;
       if (currentState == ModelLoadState.notLoaded ||
           currentState == ModelLoadState.failed) {
-        setState(() => _isLoadingModel = true);
-        _speak('Loading, please wait.');
+        final cached = await _modelDownloadService.isModelCached();
 
-        await _detectionService.loadModel();
-        if (!mounted) return;
+        if (!cached) {
+          setState(() => _isLoadingModel = true);
+          _speak('Downloading AI model.');
 
-        setState(() => _isLoadingModel = false);
+          _downloadProgressCallback = () {
+            if (!mounted) return;
+            final pct = (_modelDownloadService.downloadProgress.value * 100).round();
+            if (pct % 25 == 0 && pct > 0 && pct < 100) {
+              _speak('$pct percent done.');
+            }
+            setState(() => _downloadProgress = _modelDownloadService.downloadProgress.value);
+          };
+          _modelDownloadService.downloadProgress.addListener(_downloadProgressCallback!);
+
+          String modelPath;
+          try {
+            modelPath = await _modelDownloadService.ensureModel();
+          } catch (e) {
+            debugPrint('Download error: $e');
+            setState(() => _isLoadingModel = false);
+            _speak('Download failed. Check your internet and try again.');
+            return;
+          }
+
+          if (!mounted) return;
+          await _detectionService.loadModel(modelPath);
+
+          setState(() {
+            _isLoadingModel = false;
+            _downloadProgress = 0.0;
+          });
+        } else {
+          setState(() => _isLoadingModel = true);
+          _speak('Loading, please wait.');
+
+          final modelPath = await _modelDownloadService.getModelPath();
+          await _detectionService.loadModel(modelPath);
+          if (!mounted) return;
+
+          setState(() => _isLoadingModel = false);
+        }
 
         if (_detectionService.loadState.value == ModelLoadState.failed) {
           _speak('Could not load the AI model. Please restart the app.');
@@ -284,9 +324,14 @@ class _CameraScreenState extends State<CameraScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _playerStateSub?.cancel();
+    if (_downloadProgressCallback != null) {
+      _modelDownloadService.downloadProgress.removeListener(_downloadProgressCallback!);
+    }
+    _modelLoadListener?.call();
     _cameraService.dispose();
     _audioService.dispose();
     _detectionService.dispose();
+    _modelDownloadService.dispose();
     _tts.stop();
     _modelLoadListener?.call();
     super.dispose();
@@ -294,6 +339,12 @@ class _CameraScreenState extends State<CameraScreen>
 
   Widget _buildModelStatus() {
     final state = _detectionService.loadState.value;
+    if (_isLoadingModel && _downloadProgress > 0) {
+      return Text(
+        'Downloading... ${(_downloadProgress * 100).round()}%',
+        style: const TextStyle(color: Colors.orange, fontSize: 14, fontWeight: FontWeight.w600),
+      );
+    }
     if (state == ModelLoadState.loading || _isLoadingModel) {
       return const Row(
         mainAxisSize: MainAxisSize.min,
@@ -391,7 +442,9 @@ class _CameraScreenState extends State<CameraScreen>
             if (_isLoadingModel || modelState == ModelLoadState.loading)
               Center(
                 child: Semantics(
-                  label: 'Loading AI model, please wait',
+                  label: _downloadProgress > 0
+                      ? 'Downloading AI model, ${(_downloadProgress * 100).round()} percent'
+                      : 'Loading AI model, please wait',
                   liveRegion: true,
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -399,20 +452,35 @@ class _CameraScreenState extends State<CameraScreen>
                       color: Colors.black87,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        SizedBox(
+                        const SizedBox(
                           width: 24, height: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 3, color: Colors.orangeAccent,
                           ),
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(height: 12),
                         Text(
-                          'Loading AI Model...\nPlease wait',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                          _downloadProgress > 0
+                              ? 'Downloading AI Model...\n${(_downloadProgress * 100).round()}%'
+                              : 'Loading AI Model...\nPlease wait',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.white, fontSize: 16),
                         ),
+                        if (_downloadProgress > 0) ...[
+                          const SizedBox(height: 8),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _downloadProgress,
+                              minHeight: 6,
+                              backgroundColor: Colors.white24,
+                              valueColor: const AlwaysStoppedAnimation(Colors.orangeAccent),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

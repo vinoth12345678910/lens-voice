@@ -7,7 +7,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import '../pipeline/tracker.dart';
 
-enum ModelLoadState { notLoaded, loading, ready, failed }
+enum ModelLoadState { notLoaded, downloading, loading, ready, failed }
 
 class DetectionService {
   Interpreter? _interpreter;
@@ -20,7 +20,7 @@ class DetectionService {
 
   bool get isLoaded => loadState.value == ModelLoadState.ready;
 
-  Future<void> loadModel() async {
+  Future<void> loadModel(String filePath) async {
     if (loadState.value == ModelLoadState.ready) return;
     if (loadState.value == ModelLoadState.loading) return;
 
@@ -28,8 +28,8 @@ class DetectionService {
 
     try {
       final options = InterpreterOptions()..threads = 4;
-      _interpreter = await Interpreter.fromAsset(
-        'models/best.tflite',
+      _interpreter = await Interpreter.fromFile(
+        File(filePath),
         options: options,
       );
       loadState.value = ModelLoadState.ready;
