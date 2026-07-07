@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -182,11 +180,11 @@ class _CameraScreenState extends State<CameraScreen>
     }
   }
 
-  void _onFrame(Uint8List jpegBytes) {
+  void _onFrame(CameraImage cameraImage) {
     if (_isProcessing) return;
     _isProcessing = true;
 
-    final detections = _detectionService.runInference(jpegBytes);
+    final detections = _detectionService.runInference(cameraImage);
     if (detections == null || detections.isEmpty) {
       _isProcessing = false;
       return;

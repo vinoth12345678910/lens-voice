@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 
-typedef FrameCallback = void Function(Uint8List jpegBytes);
+typedef FrameCallback = void Function(CameraImage image);
 
 class CameraService {
   CameraController? _controller;
@@ -11,7 +11,6 @@ class CameraService {
   bool _isPaused = false;
   Timer? _throttleTimer;
   static const Duration _minInterval = Duration(milliseconds: 500);
-  bool _imageStreamActive = false;
 
   bool get isStreaming => _isStreaming;
   bool get isPaused => _isPaused;
@@ -27,7 +26,6 @@ class CameraService {
         cam,
         ResolutionPreset.medium,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
       await _controller!.initialize();
@@ -44,7 +42,6 @@ class CameraService {
 
     _isStreaming = true;
     _isPaused = false;
-    _imageStreamActive = true;
 
     await _controller!.startImageStream(_onImage);
   }
@@ -55,23 +52,9 @@ class CameraService {
 
     _throttleTimer = Timer(_minInterval, () {});
 
-    try {
-      final jpegBytes = _convertToJpeg(image);
-      if (jpegBytes != null && onFrame != null) {
-        onFrame!(jpegBytes);
-      }
-    } catch (e) {
-      debugPrint('Frame conversion error: $e');
+    if (onFrame != null) {
+      onFrame!(image);
     }
-  }
-
-  Uint8List? _convertToJpeg(CameraImage image) {
-    // CameraImage from camera plugin is already JPEG if format is jpeg
-    // If not, we'd need to encode. For now return the planes data.
-    if (image.format.group == ImageFormatGroup.jpeg) {
-      return image.planes[0].bytes;
-    }
-    return null;
   }
 
   void pauseStreaming() {
@@ -85,7 +68,6 @@ class CameraService {
   Future<void> stopStreaming() async {
     _isStreaming = false;
     _isPaused = false;
-    _imageStreamActive = false;
     _throttleTimer?.cancel();
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:math';
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
@@ -28,7 +29,7 @@ class DetectionService {
 
     try {
       final options = InterpreterOptions()..threads = 4;
-      _interpreter = await Interpreter.fromFile(
+      _interpreter = Interpreter.fromFile(
         File(filePath),
         options: options,
       );
@@ -39,26 +40,42 @@ class DetectionService {
     }
   }
 
-  List<Detection>? runInference(Uint8List jpegBytes) {
+  List<Detection>? runInference(CameraImage cameraImage) {
     if (!isLoaded || _interpreter == null) return null;
 
     try {
-      final image = img.decodeImage(jpegBytes);
-      if (image == null) return null;
+      final input = _cameraImageToNCHW(cameraImage);
+      if (input == null) return null;
 
-      final resized = img.copyResize(image, width: _inputSize, height: _inputSize);
-      final input = _imageToFloat32ListNCHW(resized);
-
-      final outputShape = [1, 300, 6];
-      final output = List<double>.filled(1 * 300 * 6, 0.0).reshape(outputShape);
+      final output = List<double>.filled(1 * 300 * 6, 0.0).reshape([1, 300, 6]);
       _interpreter!.run(input, output);
 
-      final typedOutput = output as List<List<List<double>>>;
-      return _parseOutput(typedOutput);
+      return _parseOutput(output as List<List<List<double>>>);
     } catch (e) {
       debugPrint('Inference error: $e');
       return null;
     }
+  }
+
+  Float32List? _cameraImageToNCHW(CameraImage cameraImage) {
+    final format = cameraImage.format.group;
+
+    if (format == ImageFormatGroup.jpeg) {
+      final image = img.decodeImage(cameraImage.planes[0].bytes);
+      if (image == null) return null;
+      final resized = img.copyResize(image, width: _inputSize, height: _inputSize);
+      return _imageToFloat32ListNCHW(resized);
+    }
+
+    if (format == ImageFormatGroup.nv21 || format == ImageFormatGroup.yuv420) {
+      return _yuvToNCHW(cameraImage);
+    }
+
+    if (cameraImage.planes.length >= 2) {
+      return _yuvToNCHW(cameraImage);
+    }
+
+    return null;
   }
 
   Float32List _imageToFloat32ListNCHW(img.Image image) {
@@ -78,6 +95,58 @@ class DetectionService {
       }
     }
     return input;
+  }
+
+  Float32List _yuvToNCHW(CameraImage image) {
+    final width = image.width;
+    final height = image.height;
+    final planes = image.planes;
+    final yPlane = planes[0].bytes;
+    final isNv21 = planes.length == 2;
+
+    final output = Float32List(1 * 3 * _inputSize * _inputSize);
+    final rOffset = 0 * _inputSize * _inputSize;
+    final gOffset = 1 * _inputSize * _inputSize;
+    final bOffset = 2 * _inputSize * _inputSize;
+
+    for (int y = 0; y < _inputSize; y++) {
+      for (int x = 0; x < _inputSize; x++) {
+        final srcX = x * width ~/ _inputSize;
+        final srcY = y * height ~/ _inputSize;
+
+        final yIdx = srcY * width + srcX;
+        final uvW = width >> 1;
+        final uvIdx = (srcY >> 1) * uvW + (srcX >> 1);
+
+        final Y = yPlane[yIdx].toDouble();
+
+        double U, V;
+        if (isNv21) {
+          final vuPlane = planes[1].bytes;
+          V = vuPlane[uvIdx * 2].toDouble();
+          U = vuPlane[uvIdx * 2 + 1].toDouble();
+        } else {
+          V = planes[2].bytes[uvIdx].toDouble();
+          U = planes[1].bytes[uvIdx].toDouble();
+        }
+
+        final r = _clampByte(Y + 1.402 * (V - 128));
+        final g = _clampByte(Y - 0.344136 * (U - 128) - 0.714136 * (V - 128));
+        final b = _clampByte(Y + 1.772 * (U - 128));
+
+        final cIndex = y * _inputSize + x;
+        output[rOffset + cIndex] = r / 255.0;
+        output[gOffset + cIndex] = g / 255.0;
+        output[bOffset + cIndex] = b / 255.0;
+      }
+    }
+    return output;
+  }
+
+  int _clampByte(double v) {
+    if (v < 0) return 0;
+    if (v > 255) return 255;
+    return v.round();
   }
 
   List<Detection> _parseOutput(List<List<List<double>>> output) {
