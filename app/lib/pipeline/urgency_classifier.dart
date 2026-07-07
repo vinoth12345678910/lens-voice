@@ -24,7 +24,7 @@ class UrgencyClassifier {
 
   static final Set<String> hazardPersonClasses = {'person', 'rider'};
 
-  static const double closeAreaThreshold = 0.15 * (512 * 512);
+  static const double closeAreaThreshold = 0.15 * (320 * 320);
 
   static List<UrgencyResult> classify(Map<int, dynamic> trackedObjects) {
     final results = <UrgencyResult>[];

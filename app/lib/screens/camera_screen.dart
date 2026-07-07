@@ -42,11 +42,12 @@ class _CameraScreenState extends State<CameraScreen>
   String _currentTranslatedMessage = '';
   bool _isListening = false;
   bool _isCameraReady = false;
-  bool _isModelLoaded = false;
   bool _isProcessing = false;
   bool _wasPausedByBackground = false;
+  bool _isLoadingModel = false;
 
   StreamSubscription? _playerStateSub;
+  VoidCallback? _modelLoadListener;
 
   @override
   void initState() {
@@ -57,7 +58,6 @@ class _CameraScreenState extends State<CameraScreen>
 
   Future<void> _init() async {
     await _initCamera();
-    await _initModel();
     _initSarvam();
     _watchAudioState();
     _speakReady();
@@ -68,13 +68,7 @@ class _CameraScreenState extends State<CameraScreen>
     if (mounted) setState(() => _isCameraReady = ok);
   }
 
-  Future<void> _initModel() async {
-    await _detectionService.loadModel();
-    if (mounted) setState(() => _isModelLoaded = _detectionService.isLoaded);
-  }
-
   void _initSarvam() {
-    // API key passed via --dart-define=SARVAM_API_KEY=xxx at build time
     const apiKey = String.fromEnvironment('SARVAM_API_KEY');
     if (apiKey.isNotEmpty) {
       _sarvamService = SarvamService(apiKey: apiKey);
@@ -91,22 +85,43 @@ class _CameraScreenState extends State<CameraScreen>
     });
   }
 
+  Future<void> _speak(String text) async {
+    try {
+      await _tts.setLanguage('en-US');
+      await _tts.speak(text);
+    } catch (_) {}
+  }
+
   void _speakReady() {
-    _tts.setLanguage('en-US');
-    _tts.speak('Camera ready. Tap to start listening.');
+    _speak('Camera ready. Double tap to start listening.');
   }
 
   Future<void> _toggleListening() async {
     if (!_isListening) {
       if (_sarvamService == null) {
-        _tts.stop();
-        _tts.speak(
-            'Sarvam API key not configured. Set it with dart define at build time.');
+        _speak('Sarvam API key not configured. Set it with dart define at build time.');
         return;
       }
-      if (!_isModelLoaded) {
-        _tts.stop();
-        _tts.speak('Model not loaded. Please restart the app.');
+
+      final currentState = _detectionService.loadState.value;
+      if (currentState == ModelLoadState.notLoaded ||
+          currentState == ModelLoadState.failed) {
+        setState(() => _isLoadingModel = true);
+        _speak('Loading, please wait.');
+
+        await _detectionService.loadModel();
+        if (!mounted) return;
+
+        setState(() => _isLoadingModel = false);
+
+        if (_detectionService.loadState.value == ModelLoadState.failed) {
+          _speak('Could not load the AI model. Please restart the app.');
+          return;
+        }
+
+        _speak('Ready.');
+      } else if (currentState == ModelLoadState.loading) {
+        _speak('Model is still loading. Please wait.');
         return;
       }
 
@@ -114,8 +129,7 @@ class _CameraScreenState extends State<CameraScreen>
       _cameraService.onFrame = _onFrame;
 
       setState(() => _isListening = true);
-      _tts.stop();
-      _tts.speak('Listening');
+      _speak('Listening');
     } else {
       await _cameraService.stopStreaming();
       setState(() {
@@ -124,8 +138,7 @@ class _CameraScreenState extends State<CameraScreen>
       });
       _tracker.objects.clear();
       _changeDetector.reset();
-      _tts.stop();
-      _tts.speak('Stopped');
+      _speak('Stopped');
     }
   }
 
@@ -152,7 +165,7 @@ class _CameraScreenState extends State<CameraScreen>
         _handleHazard(hazards.first);
       } else {
         final changes =
-            _changeDetector.check(infoObjects, 512, 512);
+            _changeDetector.check(infoObjects, 320, 320);
         if (changes.isNotEmpty) {
           _handleInfo(changes.first);
         }
@@ -256,15 +269,13 @@ class _CameraScreenState extends State<CameraScreen>
       if (_isListening) {
         _wasPausedByBackground = true;
         _cameraService.pauseStreaming();
-        _tts.stop();
-        _tts.speak('Paused');
+        _speak('Paused');
       }
     } else if (state == AppLifecycleState.resumed) {
       if (_wasPausedByBackground && _isListening) {
         _wasPausedByBackground = false;
         _cameraService.resumeStreaming();
-        _tts.stop();
-        _tts.speak('Resumed');
+        _speak('Resumed');
       }
     }
   }
@@ -277,11 +288,51 @@ class _CameraScreenState extends State<CameraScreen>
     _audioService.dispose();
     _detectionService.dispose();
     _tts.stop();
+    _modelLoadListener?.call();
     super.dispose();
+  }
+
+  Widget _buildModelStatus() {
+    final state = _detectionService.loadState.value;
+    if (state == ModelLoadState.loading || _isLoadingModel) {
+      return const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 14, height: 14,
+            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.orange),
+          ),
+          SizedBox(width: 8),
+          Text(
+            'Loading AI Model...',
+            style: TextStyle(color: Colors.orange, fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+        ],
+      );
+    }
+    if (state == ModelLoadState.ready) {
+      return const Text(
+        'Model Ready',
+        style: TextStyle(color: Colors.greenAccent, fontSize: 14, fontWeight: FontWeight.w600),
+      );
+    }
+    if (state == ModelLoadState.failed) {
+      return const Text(
+        'Model Failed',
+        style: TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.w600),
+      );
+    }
+    return const Text(
+      'Tap to Start',
+      style: TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.w600),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final modelState = _detectionService.loadState.value;
+    final startDisabled = _isLoadingModel || modelState == ModelLoadState.loading;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Semantics(
@@ -318,14 +369,7 @@ class _CameraScreenState extends State<CameraScreen>
               right: 16,
               child: Row(
                 children: [
-                  Text(
-                    _isModelLoaded ? 'Model Ready' : 'Loading Model...',
-                    style: TextStyle(
-                      color: _isModelLoaded ? Colors.greenAccent : Colors.orange,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  _buildModelStatus(),
                   const Spacer(),
                   Semantics(
                     label: 'Settings',
@@ -343,6 +387,37 @@ class _CameraScreenState extends State<CameraScreen>
                 ],
               ),
             ),
+
+            if (_isLoadingModel || modelState == ModelLoadState.loading)
+              Center(
+                child: Semantics(
+                  label: 'Loading AI model, please wait',
+                  liveRegion: true,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 24, height: 24,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3, color: Colors.orangeAccent,
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Text(
+                          'Loading AI Model...\nPlease wait',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
 
             Positioned(
               bottom: 60,
@@ -364,24 +439,34 @@ class _CameraScreenState extends State<CameraScreen>
                     ),
                   const SizedBox(height: 8),
                   Semantics(
-                    label: _isListening ? 'Stop listening' : 'Start listening',
+                    label: startDisabled
+                        ? 'Loading model'
+                        : _isListening
+                            ? 'Stop listening'
+                            : 'Start listening',
                     hint: 'Double tap to toggle',
                     button: true,
                     child: GestureDetector(
-                      onDoubleTap: _toggleListening,
-                      onTap: _toggleListening,
+                      onDoubleTap: startDisabled ? null : _toggleListening,
+                      onTap: startDisabled ? null : _toggleListening,
                       child: Container(
                         width: 88,
                         height: 88,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _isListening ? Colors.red : Colors.white,
+                          color: startDisabled
+                              ? Colors.grey
+                              : _isListening
+                                  ? Colors.red
+                                  : Colors.white,
                           border: Border.all(color: Colors.white, width: 3),
                           boxShadow: [
                             BoxShadow(
-                              color: _isListening
-                                  ? Colors.red.withOpacity(0.4)
-                                  : Colors.white.withOpacity(0.2),
+                              color: startDisabled
+                                  ? Colors.grey.withOpacity(0.2)
+                                  : _isListening
+                                      ? Colors.red.withOpacity(0.4)
+                                      : Colors.white.withOpacity(0.2),
                               blurRadius: 20,
                               spreadRadius: 4,
                             ),
@@ -389,7 +474,9 @@ class _CameraScreenState extends State<CameraScreen>
                         ),
                         child: Icon(
                           _isListening ? Icons.stop : Icons.play_arrow,
-                          color: _isListening ? Colors.white : Colors.black,
+                          color: startDisabled || _isListening
+                              ? Colors.white
+                              : Colors.black,
                           size: 44,
                         ),
                       ),
@@ -399,7 +486,11 @@ class _CameraScreenState extends State<CameraScreen>
                   Semantics(
                     label: _isListening ? 'Listening' : 'Tap to start',
                     child: Text(
-                      _isListening ? 'Tap to stop' : 'Tap to start',
+                      startDisabled
+                          ? 'Loading...'
+                          : _isListening
+                              ? 'Tap to stop'
+                              : 'Tap to start',
                       style: const TextStyle(color: Colors.white54, fontSize: 14),
                     ),
                   ),
