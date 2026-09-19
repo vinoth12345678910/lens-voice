@@ -1,51 +1,29 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
 venv/
 .env
+
+# Datasets and weights (too big for git — transferred out of band)
+idd-1/
+idd-1_labels_backup/
+datasets/
+archive/
 *.pt
-best.pt
 *.onnx
 *.tflite
-!app/assets/models/best.tflite
+*.mlpackage
 
-# Flutter
-app/build/
-app/.dart_tool/
-app/.packages
-app/.pub/
-app/.flutter-plugins
-app/.flutter-plugins-dependencies
-app/pubspec.lock
-app/ios/Pods/
-app/ios/.symlinks/
-app/android/.gradle/
-app/android/local.properties
-app/android/key.properties
-app/android/app/build/
-app/android/captures/
-app/.idea/
+# Training outputs
+runs/
+*.log
 
 # macOS
 .DS_Store
 *.swp
-*.swo
 *~
 
 # IDEs
 .vscode/
 .idea/
 *.iml
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Test outputs
-*.wav
-test.png
-runs/
-datasets/
-
-idd-1

@@ -1,0 +1,14 @@
+# Install torch FIRST from the CUDA index, then this file.
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+#   pip install -r training/requirements-gpu.txt
+#
+# Pinned to the version the app's [1,300,6] decoder was built against.
+# A different ultralytics major can change the YOLO26 export layout.
+ultralytics==8.4.90
+onnx>=1.16
+onnxruntime>=1.18
+onnx2tf>=1.22
+tensorflow>=2.16      # only needed for the TFLite export + shape verification
+sng4onnx>=1.0.1
+onnx_graphsurgeon>=0.5
+tf_keras
