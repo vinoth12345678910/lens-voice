@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 venv/
 .env
+*.egg-info/
+.pytest_cache/
 
 # Datasets and weights (too big for git — transferred out of band)
 idd-1/
@@ -16,7 +18,17 @@ archive/
 
 # Training outputs
 runs/
+experiments/
 *.log
+# keep the two handoff experiment configs tracked
+!experiments/
+experiments/*
+!experiments/exp_unified_diag/
+experiments/exp_unified_diag/*
+!experiments/exp_unified_diag/config.json
+!experiments/exp_train_l/
+experiments/exp_train_l/*
+!experiments/exp_train_l/config.json
 
 # macOS
 .DS_Store
@@ -27,3 +39,6 @@ runs/
 .vscode/
 .idea/
 *.iml
+
+# Transfer archives
+*.zip

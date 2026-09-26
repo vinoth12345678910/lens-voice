@@ -1,0 +1,151 @@
+{
+  "data_root": "datasets/cleaned/v1",
+  "total": {
+    "instances": 474356,
+    "images": 44331,
+    "issues": 105382
+  },
+  "splits": {
+    "train": {
+      "split": "train",
+      "images": 31032,
+      "labels": 31032,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 1409,
+      "nonempty_label_files": 29623,
+      "images_with_any_box": 29623,
+      "instances": 332410,
+      "instances_per_class": {
+        "0": 134301,
+        "1": 65797,
+        "2": 74898,
+        "3": 13746,
+        "4": 20432,
+        "5": 23236
+      },
+      "images_per_class": {
+        "0": 23900,
+        "1": 19143,
+        "2": 20795,
+        "3": 7830,
+        "4": 11574,
+        "5": 10481
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 18971,
+        "small_side_lt_0_01": 52593,
+        "huge_side_gt_0_95": 2103,
+        "duplicate_boxes_within_file": 0,
+        "duplicate_dupe_lines_within_file": 0
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 14650,
+        "4e-5-1e-3": 56772,
+        "<1% ": 176878,
+        "<10%": 64483,
+        "<4e-5 (~<16px area @640)": 4321,
+        ">=10%": 15306
+      },
+      "issues_total": 73667
+    },
+    "val": {
+      "split": "val",
+      "images": 8866,
+      "labels": 8866,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 403,
+      "nonempty_label_files": 8463,
+      "images_with_any_box": 8463,
+      "instances": 95396,
+      "instances_per_class": {
+        "0": 38658,
+        "1": 18889,
+        "2": 21580,
+        "3": 3756,
+        "4": 5787,
+        "5": 6726
+      },
+      "images_per_class": {
+        "0": 6856,
+        "1": 5439,
+        "2": 5944,
+        "3": 2195,
+        "4": 3319,
+        "5": 3006
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 5620,
+        "small_side_lt_0_01": 15455,
+        "huge_side_gt_0_95": 582,
+        "duplicate_boxes_within_file": 0,
+        "duplicate_dupe_lines_within_file": 0
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 4245,
+        "4e-5-1e-3": 16650,
+        "<1% ": 50524,
+        "<10%": 18243,
+        "<4e-5 (~<16px area @640)": 1375,
+        ">=10%": 4359
+      },
+      "issues_total": 21657
+    },
+    "test": {
+      "split": "test",
+      "images": 4433,
+      "labels": 4433,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 186,
+      "nonempty_label_files": 4247,
+      "images_with_any_box": 4247,
+      "instances": 46550,
+      "instances_per_class": {
+        "0": 18922,
+        "1": 9115,
+        "2": 10484,
+        "3": 1857,
+        "4": 2875,
+        "5": 3297
+      },
+      "images_per_class": {
+        "0": 3437,
+        "1": 2655,
+        "2": 2964,
+        "3": 1093,
+        "4": 1611,
+        "5": 1501
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 2642,
+        "small_side_lt_0_01": 7139,
+        "huge_side_gt_0_95": 277,
+        "duplicate_boxes_within_file": 0,
+        "duplicate_dupe_lines_within_file": 0
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 2031,
+        "4e-5-1e-3": 7620,
+        "<1% ": 24900,
+        "<10%": 9238,
+        "<4e-5 (~<16px area @640)": 611,
+        ">=10%": 2150
+      },
+      "issues_total": 10058
+    }
+  }
+}

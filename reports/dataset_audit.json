@@ -1,0 +1,187 @@
+{
+  "data_root": "datasets/original/idd-1",
+  "total": {
+    "instances": 524841,
+    "images": 44331,
+    "issues": 126551
+  },
+  "splits": {
+    "train": {
+      "split": "train",
+      "images": 31032,
+      "labels": 31032,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 62,
+      "nonempty_label_files": 30970,
+      "images_with_any_box": 30970,
+      "instances": 367706,
+      "instances_per_class": {
+        "0": 4644,
+        "1": 23236,
+        "2": 2346,
+        "3": 13747,
+        "4": 65798,
+        "5": 74898,
+        "6": 63716,
+        "7": 70588,
+        "8": 2674,
+        "9": 10207,
+        "10": 20433,
+        "11": 15419
+      },
+      "images_per_class": {
+        "0": 1564,
+        "1": 10481,
+        "2": 2025,
+        "3": 7830,
+        "4": 19143,
+        "5": 20795,
+        "6": 15825,
+        "7": 18562,
+        "8": 1245,
+        "9": 5763,
+        "10": 11574,
+        "11": 8399
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 24047,
+        "small_side_lt_0_01": 62043,
+        "huge_side_gt_0_95": 2135,
+        "duplicate_boxes_within_file": 6,
+        "duplicate_dupe_lines_within_file": 6
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 18146,
+        "4e-5-1e-3": 66852,
+        "<1% ": 193595,
+        "<10%": 67589,
+        "<4e-5 (~<16px area @640)": 5901,
+        ">=10%": 15623
+      },
+      "issues_total": 88237
+    },
+    "valid": {
+      "split": "valid",
+      "images": 8866,
+      "labels": 8866,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 16,
+      "nonempty_label_files": 8850,
+      "images_with_any_box": 8850,
+      "instances": 105583,
+      "instances_per_class": {
+        "0": 1320,
+        "1": 6726,
+        "2": 640,
+        "3": 3756,
+        "4": 18889,
+        "5": 21580,
+        "6": 18255,
+        "7": 20403,
+        "8": 721,
+        "9": 2981,
+        "10": 5787,
+        "11": 4525
+      },
+      "images_per_class": {
+        "0": 460,
+        "1": 3006,
+        "2": 550,
+        "3": 2195,
+        "4": 5439,
+        "5": 5944,
+        "6": 4589,
+        "7": 5307,
+        "8": 332,
+        "9": 1737,
+        "10": 3319,
+        "11": 2420
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 7191,
+        "small_side_lt_0_01": 18273,
+        "huge_side_gt_0_95": 594,
+        "duplicate_boxes_within_file": 0,
+        "duplicate_dupe_lines_within_file": 0
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 5335,
+        "4e-5-1e-3": 19604,
+        "<1% ": 55205,
+        "<10%": 19114,
+        "<4e-5 (~<16px area @640)": 1856,
+        ">=10%": 4469
+      },
+      "issues_total": 26058
+    },
+    "test": {
+      "split": "test",
+      "images": 4433,
+      "labels": 4433,
+      "labels_missing_image": 0,
+      "images_missing_label": 0,
+      "empty_label_files": 9,
+      "nonempty_label_files": 4424,
+      "images_with_any_box": 4424,
+      "instances": 51552,
+      "instances_per_class": {
+        "0": 718,
+        "1": 3297,
+        "2": 340,
+        "3": 1857,
+        "4": 9115,
+        "5": 10484,
+        "6": 9123,
+        "7": 9799,
+        "8": 355,
+        "9": 1499,
+        "10": 2875,
+        "11": 2090
+      },
+      "images_per_class": {
+        "0": 237,
+        "1": 1501,
+        "2": 301,
+        "3": 1093,
+        "4": 2655,
+        "5": 2964,
+        "6": 2304,
+        "7": 2656,
+        "8": 157,
+        "9": 782,
+        "10": 1611,
+        "11": 1174
+      },
+      "issues": {
+        "invalid_class_id": 0,
+        "negative_coords": 0,
+        "zero_area": 0,
+        "out_of_bounds": 0,
+        "tiny_boxes_area_lt_1e4": 3428,
+        "small_side_lt_0_01": 8546,
+        "huge_side_gt_0_95": 282,
+        "duplicate_boxes_within_file": 0,
+        "duplicate_dupe_lines_within_file": 0
+      },
+      "area_buckets": {
+        "1e-4-4e-5": 2539,
+        "4e-5-1e-3": 9008,
+        "<1% ": 27244,
+        "<10%": 9670,
+        "<4e-5 (~<16px area @640)": 889,
+        ">=10%": 2202
+      },
+      "issues_total": 12256
+    }
+  }
+}

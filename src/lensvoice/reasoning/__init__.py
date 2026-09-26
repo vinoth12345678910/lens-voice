@@ -1,0 +1,1 @@
+"""Reasoning subpackage: turns raw evidence into structured meaning."""

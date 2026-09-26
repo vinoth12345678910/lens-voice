@@ -1,0 +1,505 @@
+{
+  "generated_at": "2026-09-26T14:47:13",
+  "dataset_ref": "awsaf49/coco-2017-dataset",
+  "annotation_files": {
+    "train": "datasets/source-coco/coco2017/annotations/instances_train2017.json",
+    "val": "datasets/source-coco/coco2017/annotations/instances_val2017.json"
+  },
+  "est_image_size_bytes": 210000,
+  "mapping": {
+    "0": {
+      "name": "person",
+      "coco_name": "person"
+    },
+    "1": {
+      "name": "car",
+      "coco_name": "car"
+    },
+    "2": {
+      "name": "motorcycle",
+      "coco_name": "motorcycle"
+    },
+    "3": {
+      "name": "bus",
+      "coco_name": "bus"
+    },
+    "4": {
+      "name": "truck",
+      "coco_name": "truck"
+    },
+    "6": {
+      "name": "bicycle",
+      "coco_name": "bicycle"
+    },
+    "7": {
+      "name": "chair",
+      "coco_name": "chair"
+    },
+    "8": {
+      "name": "table",
+      "coco_name": "dining table"
+    },
+    "9": {
+      "name": "couch",
+      "coco_name": "couch"
+    },
+    "10": {
+      "name": "bed",
+      "coco_name": "bed"
+    },
+    "11": {
+      "name": "backpack",
+      "coco_name": "backpack"
+    },
+    "12": {
+      "name": "bag",
+      "coco_name": "handbag"
+    },
+    "13": {
+      "name": "suitcase",
+      "coco_name": "suitcase"
+    },
+    "14": {
+      "name": "bottle",
+      "coco_name": "bottle"
+    },
+    "15": {
+      "name": "cup",
+      "coco_name": "cup"
+    },
+    "16": {
+      "name": "bowl",
+      "coco_name": "bowl"
+    },
+    "17": {
+      "name": "laptop",
+      "coco_name": "laptop"
+    },
+    "18": {
+      "name": "cell_phone",
+      "coco_name": "cell phone"
+    },
+    "19": {
+      "name": "book",
+      "coco_name": "book"
+    },
+    "20": {
+      "name": "keyboard",
+      "coco_name": "keyboard"
+    },
+    "21": {
+      "name": "mouse",
+      "coco_name": "mouse"
+    },
+    "22": {
+      "name": "tv_monitor",
+      "coco_name": "tv"
+    },
+    "23": {
+      "name": "bench",
+      "coco_name": "bench"
+    },
+    "24": {
+      "name": "umbrella",
+      "coco_name": "umbrella"
+    },
+    "25": {
+      "name": "dog",
+      "coco_name": "dog"
+    }
+  },
+  "not_in_coco": [
+    "autorickshaw"
+  ],
+  "categories": {
+    "0": {
+      "lensvoice_id": 0,
+      "lensvoice_name": "person",
+      "train_instances": 262465,
+      "train_images": 64115,
+      "val_instances": 11004,
+      "val_images": 2693,
+      "instances": 273469,
+      "unique_images": 66808
+    },
+    "1": {
+      "lensvoice_id": 1,
+      "lensvoice_name": "car",
+      "train_instances": 43867,
+      "train_images": 12251,
+      "val_instances": 1932,
+      "val_images": 535,
+      "instances": 45799,
+      "unique_images": 12786
+    },
+    "2": {
+      "lensvoice_id": 2,
+      "lensvoice_name": "motorcycle",
+      "train_instances": 8725,
+      "train_images": 3502,
+      "val_instances": 371,
+      "val_images": 159,
+      "instances": 9096,
+      "unique_images": 3661
+    },
+    "3": {
+      "lensvoice_id": 3,
+      "lensvoice_name": "bus",
+      "train_instances": 6069,
+      "train_images": 3952,
+      "val_instances": 285,
+      "val_images": 189,
+      "instances": 6354,
+      "unique_images": 4141
+    },
+    "4": {
+      "lensvoice_id": 4,
+      "lensvoice_name": "truck",
+      "train_instances": 9973,
+      "train_images": 6127,
+      "val_instances": 415,
+      "val_images": 250,
+      "instances": 10388,
+      "unique_images": 6377
+    },
+    "6": {
+      "lensvoice_id": 6,
+      "lensvoice_name": "bicycle",
+      "train_instances": 7113,
+      "train_images": 3252,
+      "val_instances": 316,
+      "val_images": 149,
+      "instances": 7429,
+      "unique_images": 3401
+    },
+    "7": {
+      "lensvoice_id": 7,
+      "lensvoice_name": "chair",
+      "train_instances": 38491,
+      "train_images": 12774,
+      "val_instances": 1791,
+      "val_images": 580,
+      "instances": 40282,
+      "unique_images": 13354
+    },
+    "8": {
+      "lensvoice_id": 8,
+      "lensvoice_name": "table",
+      "train_instances": 15714,
+      "train_images": 11837,
+      "val_instances": 697,
+      "val_images": 501,
+      "instances": 16411,
+      "unique_images": 12338
+    },
+    "9": {
+      "lensvoice_id": 9,
+      "lensvoice_name": "couch",
+      "train_instances": 5779,
+      "train_images": 4423,
+      "val_instances": 261,
+      "val_images": 195,
+      "instances": 6040,
+      "unique_images": 4618
+    },
+    "10": {
+      "lensvoice_id": 10,
+      "lensvoice_name": "bed",
+      "train_instances": 4192,
+      "train_images": 3682,
+      "val_instances": 163,
+      "val_images": 149,
+      "instances": 4355,
+      "unique_images": 3831
+    },
+    "11": {
+      "lensvoice_id": 11,
+      "lensvoice_name": "backpack",
+      "train_instances": 8720,
+      "train_images": 5528,
+      "val_instances": 371,
+      "val_images": 228,
+      "instances": 9091,
+      "unique_images": 5756
+    },
+    "12": {
+      "lensvoice_id": 12,
+      "lensvoice_name": "bag",
+      "train_instances": 12354,
+      "train_images": 6841,
+      "val_instances": 540,
+      "val_images": 292,
+      "instances": 12894,
+      "unique_images": 7133
+    },
+    "13": {
+      "lensvoice_id": 13,
+      "lensvoice_name": "suitcase",
+      "train_instances": 6192,
+      "train_images": 2402,
+      "val_instances": 303,
+      "val_images": 105,
+      "instances": 6495,
+      "unique_images": 2507
+    },
+    "14": {
+      "lensvoice_id": 14,
+      "lensvoice_name": "bottle",
+      "train_instances": 24342,
+      "train_images": 8501,
+      "val_instances": 1025,
+      "val_images": 379,
+      "instances": 25367,
+      "unique_images": 8880
+    },
+    "15": {
+      "lensvoice_id": 15,
+      "lensvoice_name": "cup",
+      "train_instances": 20650,
+      "train_images": 9189,
+      "val_instances": 899,
+      "val_images": 390,
+      "instances": 21549,
+      "unique_images": 9579
+    },
+    "16": {
+      "lensvoice_id": 16,
+      "lensvoice_name": "bowl",
+      "train_instances": 14358,
+      "train_images": 7111,
+      "val_instances": 626,
+      "val_images": 314,
+      "instances": 14984,
+      "unique_images": 7425
+    },
+    "17": {
+      "lensvoice_id": 17,
+      "lensvoice_name": "laptop",
+      "train_instances": 4970,
+      "train_images": 3524,
+      "val_instances": 231,
+      "val_images": 183,
+      "instances": 5201,
+      "unique_images": 3707
+    },
+    "18": {
+      "lensvoice_id": 18,
+      "lensvoice_name": "cell_phone",
+      "train_instances": 6434,
+      "train_images": 4803,
+      "val_instances": 262,
+      "val_images": 214,
+      "instances": 6696,
+      "unique_images": 5017
+    },
+    "19": {
+      "lensvoice_id": 19,
+      "lensvoice_name": "book",
+      "train_instances": 24715,
+      "train_images": 5332,
+      "val_instances": 1161,
+      "val_images": 230,
+      "instances": 25876,
+      "unique_images": 5562
+    },
+    "20": {
+      "lensvoice_id": 20,
+      "lensvoice_name": "keyboard",
+      "train_instances": 2855,
+      "train_images": 2115,
+      "val_instances": 153,
+      "val_images": 106,
+      "instances": 3008,
+      "unique_images": 2221
+    },
+    "21": {
+      "lensvoice_id": 21,
+      "lensvoice_name": "mouse",
+      "train_instances": 2262,
+      "train_images": 1876,
+      "val_instances": 106,
+      "val_images": 88,
+      "instances": 2368,
+      "unique_images": 1964
+    },
+    "22": {
+      "lensvoice_id": 22,
+      "lensvoice_name": "tv_monitor",
+      "train_instances": 5805,
+      "train_images": 4561,
+      "val_instances": 288,
+      "val_images": 207,
+      "instances": 6093,
+      "unique_images": 4768
+    },
+    "23": {
+      "lensvoice_id": 23,
+      "lensvoice_name": "bench",
+      "train_instances": 9838,
+      "train_images": 5570,
+      "val_instances": 413,
+      "val_images": 235,
+      "instances": 10251,
+      "unique_images": 5805
+    },
+    "24": {
+      "lensvoice_id": 24,
+      "lensvoice_name": "umbrella",
+      "train_instances": 11431,
+      "train_images": 3968,
+      "val_instances": 413,
+      "val_images": 174,
+      "instances": 11844,
+      "unique_images": 4142
+    },
+    "25": {
+      "lensvoice_id": 25,
+      "lensvoice_name": "dog",
+      "train_instances": 5508,
+      "train_images": 4385,
+      "val_instances": 218,
+      "val_images": 177,
+      "instances": 5726,
+      "unique_images": 4562
+    }
+  },
+  "union": {
+    "train_required_images": 90813,
+    "train_multi_class_images": 53032,
+    "val_required_images": 3847,
+    "val_multi_class_images": 2300,
+    "total_required_images": 94660,
+    "total_required_instances": 587066,
+    "train_est_download_mib": 18187.3,
+    "val_est_download_mib": 770.4,
+    "total_est_download_mib": 18957.7,
+    "avg_objects_per_required_image": 6.2
+  },
+  "imbalance": {
+    "person": {
+      "instances": 273469,
+      "ratio_to_smallest": 115.5,
+      "pct_of_total": 46.6
+    },
+    "car": {
+      "instances": 45799,
+      "ratio_to_smallest": 19.3,
+      "pct_of_total": 7.8
+    },
+    "chair": {
+      "instances": 40282,
+      "ratio_to_smallest": 17.0,
+      "pct_of_total": 6.9
+    },
+    "book": {
+      "instances": 25876,
+      "ratio_to_smallest": 10.9,
+      "pct_of_total": 4.4
+    },
+    "bottle": {
+      "instances": 25367,
+      "ratio_to_smallest": 10.7,
+      "pct_of_total": 4.3
+    },
+    "cup": {
+      "instances": 21549,
+      "ratio_to_smallest": 9.1,
+      "pct_of_total": 3.7
+    },
+    "table": {
+      "instances": 16411,
+      "ratio_to_smallest": 6.9,
+      "pct_of_total": 2.8
+    },
+    "bowl": {
+      "instances": 14984,
+      "ratio_to_smallest": 6.3,
+      "pct_of_total": 2.6
+    },
+    "bag": {
+      "instances": 12894,
+      "ratio_to_smallest": 5.4,
+      "pct_of_total": 2.2
+    },
+    "umbrella": {
+      "instances": 11844,
+      "ratio_to_smallest": 5.0,
+      "pct_of_total": 2.0
+    },
+    "truck": {
+      "instances": 10388,
+      "ratio_to_smallest": 4.4,
+      "pct_of_total": 1.8
+    },
+    "bench": {
+      "instances": 10251,
+      "ratio_to_smallest": 4.3,
+      "pct_of_total": 1.7
+    },
+    "motorcycle": {
+      "instances": 9096,
+      "ratio_to_smallest": 3.8,
+      "pct_of_total": 1.5
+    },
+    "backpack": {
+      "instances": 9091,
+      "ratio_to_smallest": 3.8,
+      "pct_of_total": 1.5
+    },
+    "bicycle": {
+      "instances": 7429,
+      "ratio_to_smallest": 3.1,
+      "pct_of_total": 1.3
+    },
+    "cell_phone": {
+      "instances": 6696,
+      "ratio_to_smallest": 2.8,
+      "pct_of_total": 1.1
+    },
+    "suitcase": {
+      "instances": 6495,
+      "ratio_to_smallest": 2.7,
+      "pct_of_total": 1.1
+    },
+    "bus": {
+      "instances": 6354,
+      "ratio_to_smallest": 2.7,
+      "pct_of_total": 1.1
+    },
+    "tv_monitor": {
+      "instances": 6093,
+      "ratio_to_smallest": 2.6,
+      "pct_of_total": 1.0
+    },
+    "couch": {
+      "instances": 6040,
+      "ratio_to_smallest": 2.6,
+      "pct_of_total": 1.0
+    },
+    "dog": {
+      "instances": 5726,
+      "ratio_to_smallest": 2.4,
+      "pct_of_total": 1.0
+    },
+    "laptop": {
+      "instances": 5201,
+      "ratio_to_smallest": 2.2,
+      "pct_of_total": 0.9
+    },
+    "bed": {
+      "instances": 4355,
+      "ratio_to_smallest": 1.8,
+      "pct_of_total": 0.7
+    },
+    "keyboard": {
+      "instances": 3008,
+      "ratio_to_smallest": 1.3,
+      "pct_of_total": 0.5
+    },
+    "mouse": {
+      "instances": 2368,
+      "ratio_to_smallest": 1.0,
+      "pct_of_total": 0.4
+    }
+  }
+}

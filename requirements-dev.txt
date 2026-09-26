@@ -1,0 +1,2 @@
+# Development / test requirements for the LensVoice runtime.
+pytest>=7

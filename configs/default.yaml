@@ -1,0 +1,146 @@
+# LensVoice runtime configuration (defaults).
+#
+# No hardcoded model paths, camera indices, or tuning values should live in
+# code. Edit this file (or pass a custom --config) to wire real models in.
+#
+# Taxonomy: the locked 26-class LensVoice detection taxonomy. This is the
+# reference copy for the runtime; training/labels live under datasets/.
+n_classes: 26
+class_names:
+  0: person
+  1: car
+  2: motorcycle
+  3: bus
+  4: truck
+  5: autorickshaw
+  6: bicycle
+  7: chair
+  8: table
+  9: couch
+  10: bed
+  11: backpack
+  12: bag
+  13: suitcase
+  14: bottle
+  15: cup
+  16: bowl
+  17: laptop
+  18: cell_phone
+  19: book
+  20: keyboard
+  21: mouse
+  22: tv_monitor
+  23: bench
+  24: umbrella
+  25: dog
+
+camera:
+  source: 0
+  width: 1280
+  height: 720
+  fps: 30
+
+scheduler:
+  camera_fps: 30
+  detection_fps: 10
+  ocr_fps: 2
+  traffic_sign_fps: 3
+  depth_fps: 5
+  scene_fps: 1
+
+models:
+  yolo:
+    enabled: false
+    weight: ""            # e.g. experiments/exp_train_l/weights/best.pt
+    confidence: 0.25
+    iou: 0.45
+    device: auto
+    imgsz: 640
+  ocr:
+    enabled: false
+    weight: ""            # PaddleOCR model dir (optional); empty = default
+    language: en
+    guess_language: false
+  traffic_sign:
+    enabled: false
+    weight: ""            # sign detector weights (to be provided by Friend 1)
+    classifier_weight: "" # sign classifier weights (to be provided by Friend 1)
+    confidence: 0.4
+  depth:
+    enabled: false
+    weight: ""            # Depth Anything / MiDaS weights
+    device: auto
+  scene:
+    enabled: false
+    weight: ""            # scene classifier / CLIP-style weights
+    device: auto
+
+tracking:
+  method: mock            # mock | bytetrack | botsort (others PLANNED)
+  iou_threshold: 0.35
+  max_age_frames: 30
+  min_confidence: 0.05
+
+spatial:
+  # bbox-center x fractions that split horizontal thirds
+  left_boundary: 0.333
+  right_boundary: 0.666
+  # bbox-center y fractions that split vertical thirds
+  upper_boundary: 0.333
+  lower_boundary: 0.666
+  # relative-depth bins -> category (relative, NOT metric distance)
+  distance_bins:
+    very_near: 0.15
+    near: 0.35
+    medium: 0.60
+    far: 0.85
+
+temporal:
+  min_observations: 3      # frames needed before motion/approach classification
+  disappear_frames: 3      # frames without a track before it is "disappeared"
+  movement_ratio: 0.03     # center displacement / frame width to count as moving
+  approach_ratio: 0.85     # bbox-width shrink ratio that counts as approaching
+  recede_ratio: 1.18
+
+change_detection:
+  cooldown_ms: 5000
+  moved_center_ratio: 0.10 # bbox-center delta / frame width to re-narrate movement
+  distance_drop_levels: 1  # re-narrate when depth category drops by >= N levels
+  text_cooldown_ms: 8000
+
+safety:
+  center_band: 0.5         # fraction of frame width considered "in path" when near
+  close_depth_categories: [very_near, near]
+  require_approaching_for_vehicle: true
+
+priority:
+  weights:
+    safety: 100.0
+    proximity: 30.0
+    approaching: 25.0
+    new_object: 10.0
+    navigation: 15.0
+    information: 5.0
+  levels:
+    critical: 80.0
+    high: 55.0
+    medium: 30.0
+  repetition_penalty: 8.0
+
+audio:
+  max_queue_size: 4
+  cooldown_ms: 5000
+  interrupt_on_critical: true
+
+tts:
+  provider: silent         # silent (stub) | piper | system (PLANNED)
+  voice: ""
+
+logging:
+  level: INFO
+  structured: true
+  json: false              # true = newline-delimited JSON
+
+metrics:
+  enabled: true
+  window_seconds: 60
