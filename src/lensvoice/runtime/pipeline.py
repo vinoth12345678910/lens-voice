@@ -29,6 +29,7 @@ from lensvoice.telemetry.logger import Logger
 from lensvoice.telemetry.metrics import MetricsCollector
 from lensvoice.tracking.tracker import MockTracker
 from lensvoice.utils.time import Clock, monotonic_ms
+from lensvoice.tracking.factory import create_tracker
 
 
 class Pipeline:
@@ -57,7 +58,7 @@ class Pipeline:
         self.depth_model = models["depth"]
         self.scene = models["scene"]
 
-        self.tracker = MockTracker(settings.tracking)
+        self.tracker = create_tracker(settings.tracking)
         self.spatial = SpatialAnalyzer(settings.spatial)
         self.temporal = TemporalAnalyzer(settings.temporal)
         self.change = ChangeDetector(settings.change_detection, settings.temporal)
