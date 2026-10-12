@@ -61,10 +61,12 @@ class SpatialAnalyzer:
         if x2 <= x1 or y2 <= y1:
             return "unknown"
         region = depth[y1:y2 + 1, x1:x2 + 1]
-        value = float(np.median(region))
+        # DepthResult contract: relative depth in [0,1], 1.0 = CLOSEST. The bins are
+        # upper bounds on relative distance, so distance = 1 - closeness.
+        distance = 1.0 - float(np.median(region))
         for label, bound in sorted(self.cfg.distance_bins.items(),
                                    key=lambda kv: kv[1]):
-            if value <= bound:
+            if distance <= bound:
                 return label
         return "far"
 

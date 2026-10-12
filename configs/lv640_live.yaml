@@ -1,0 +1,183 @@
+# LensVoice LIVE config: Mac webcam in -> trained LV640 detector -> Sarvam AI voice out.
+#
+#   export SARVAM_API_KEY=...            # in the terminal only; never put the key in a file
+#   venv/bin/python scripts/run_pipeline.py --config configs/lv640_live.yaml --show
+#   (add --source path/to/video.mp4 to play a video instead of the webcam)
+#
+# Differences from configs/lv640.yaml (all marked "LIVE"):
+#   - tts.provider sarvam (cloud API, needs internet; pipeline + playback run locally)
+#   - audio.async_playback: speech runs in a background thread, camera loop never waits
+#   - audio.max_age_ms: speech older than 2 s is dropped instead of spoken late
+#   - narration.mode pull: no queue; the voice asks the scene what matters when it is free (see narration: below)
+#   - audio.dedupe_ms: the same sentence is not repeated within 6 s (push mode only)
+#   - audio.low_gap_ms: at most one routine announcement per 1.5 s (no backlog); interrupt_on_critical off (no cut-off words)
+#   - ocr / traffic_sign mock: false  -> no canned "stop sign ahead" / "text says STOP"
+#   - yolo.confidence 0.40 (was 0.25): fewer false objects spoken aloud (unvalidated starting point)
+#   - depth: REAL (Depth Anything V2 small). Distance words are relative to the scene, never metres.
+n_classes: 26
+class_names:
+  0: person
+  1: car
+  2: motorcycle
+  3: bus
+  4: truck
+  5: autorickshaw
+  6: bicycle
+  7: chair
+  8: table
+  9: couch
+  10: bed
+  11: backpack
+  12: bag
+  13: suitcase
+  14: bottle
+  15: cup
+  16: bowl
+  17: laptop
+  18: cell_phone
+  19: book
+  20: keyboard
+  21: mouse
+  22: tv_monitor
+  23: bench
+  24: umbrella
+  25: dog
+
+camera:
+  source: 0
+  width: 1280
+  height: 720
+  fps: 30
+
+scheduler:
+  camera_fps: 30
+  detection_fps: 10
+  ocr_fps: 2
+  traffic_sign_fps: 3
+  depth_fps: 5
+  scene_fps: 1
+
+models:
+  yolo:
+    enabled: true
+    weight: models/lv640_best.pt   # yolo26l, trained at imgsz 640 (checkpoint: lv640_best.pt)
+    confidence: 0.40       # LIVE
+    iou: 0.45
+    device: mps      # NOT 'auto': YOLOAdapter passes it straight to Ultralytics, which rejects 'auto'. Use 0 on a CUDA box, cpu otherwise.
+    imgsz: 640
+  ocr:
+    enabled: false
+    mock: false            # LIVE: report nothing, not canned text
+    weight: ""            # PaddleOCR model dir (optional); empty = default
+    language: en
+    guess_language: false
+  traffic_sign:
+    enabled: false
+    mock: false            # LIVE: report nothing, not canned signs
+    weight: ""            # sign detector weights (to be provided by Friend 1)
+    classifier_weight: "" # sign classifier weights (to be provided by Friend 1)
+    confidence: 0.4
+  depth:
+    enabled: true          # LIVE: real relative depth (Depth Anything V2 small, downloaded once from Hugging Face)
+    weight: depth-anything/Depth-Anything-V2-Small-hf
+    device: mps
+    imgsz: 252             # input short side in px (multiple of 14); 252 ~ 28 ms, 518 ~ 190 ms on M-series
+  scene:
+    enabled: false
+    weight: ""            # scene classifier / CLIP-style weights
+    device: auto
+
+tracking:
+  method: mock            # mock | bytetrack | botsort (others PLANNED)
+  iou_threshold: 0.35
+  max_age_frames: 30
+  min_confidence: 0.05
+
+spatial:
+  # bbox-center x fractions that split horizontal thirds
+  left_boundary: 0.333
+  right_boundary: 0.666
+  # bbox-center y fractions that split vertical thirds
+  upper_boundary: 0.333
+  lower_boundary: 0.666
+  # relative-depth bins -> category (relative, NOT metric distance)
+  distance_bins:
+    very_near: 0.15
+    near: 0.35
+    medium: 0.60
+    far: 0.85
+
+temporal:
+  min_observations: 3      # frames needed before motion/approach classification
+  disappear_frames: 3      # frames without a track before it is "disappeared"
+  movement_ratio: 0.03     # center displacement / frame width to count as moving
+  approach_ratio: 0.85     # bbox-width shrink ratio that counts as approaching
+  recede_ratio: 1.18
+
+change_detection:
+  cooldown_ms: 5000
+  moved_center_ratio: 0.10 # bbox-center delta / frame width to re-narrate movement
+  distance_drop_levels: 1  # re-narrate when depth category drops by >= N levels
+  text_cooldown_ms: 8000
+
+safety:
+  center_band: 0.5         # fraction of frame width considered "in path" when near
+  close_depth_categories: [very_near, near]
+  require_approaching_for_vehicle: true
+
+priority:
+  weights:
+    safety: 100.0
+    proximity: 30.0
+    approaching: 25.0
+    new_object: 10.0
+    navigation: 15.0
+    information: 5.0
+  levels:
+    critical: 80.0
+    high: 55.0
+    medium: 30.0
+  repetition_penalty: 8.0
+
+audio:
+  max_queue_size: 4
+  cooldown_ms: 5000
+  interrupt_on_critical: false   # LIVE: never cut a sentence off mid-word; an urgent one plays next
+  async_playback: true     # LIVE
+  max_age_ms: 2000         # LIVE
+  dedupe_ms: 6000          # LIVE: never repeat the same sentence within 6 s
+  low_gap_ms: 1500         # LIVE: at most one routine (LOW) announcement per 1.5 s; urgent ones are never limited
+
+narration:
+  mode: pull               # LIVE: stable scene + 'what is the single most important thing now?' asked when the voice is free
+  min_gap_normal_s: 3.0
+  urgent_cooldown_s: 4.0
+  urgent_min_gap_s: 2.0    # no flood of urgents; static objects never 'approach' (that is the camera); ego-motion filter on
+  interrupt_urgent: true   # urgent news cuts off non-urgent speech (urgent sentences are rare)
+  summary_on_start: true   # one scene summary after the first objects are confirmed; press 's' in the window for another
+  ambient_silence_s: 25    # ... and again after this much silence (0 = off)
+
+tts:
+  provider: sarvam         # LIVE (silent | sarvam)
+  voice: priya             # bulbul:v3 speaker (e.g. priya, shubh, ritu, aditya)
+  language: en-IN
+  model: bulbul:v3
+  pace: 1.1                # LIVE: natural pace (1.2 sounded rushed)
+  warm_on_start: true      # LIVE: pre-fetch the urgent sentences at start (cached on disk, so only the first run pays)
+  sample_rate: 16000       # LIVE: smaller audio, faster download (speech quality is fine)
+  cache_dir: ~/.cache/lensvoice/tts   # LIVE: a sentence is fetched once, ever (persistent audio cache)
+  prefetch: true           # LIVE: fetch audio the moment a sentence is queued
+  prefetch_workers: 2
+  max_rps: 2.0             # LIVE: start at 2 requests/s; backs off automatically on HTTP 429 (rate limit)
+  fallback_local_ms: 350   # LIVE: if Sarvam audio is not ready in 0.35 s, say it NOW with the Mac voice (0 = off, or --sarvam-only)
+  fallback_rate: 210
+  api_key_env: SARVAM_API_KEY   # NAME of the env var; the key is never stored here
+
+logging:
+  level: INFO
+  structured: true
+  json: false              # true = newline-delimited JSON
+
+metrics:
+  enabled: true
+  window_seconds: 60
