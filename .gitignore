@@ -42,3 +42,5 @@ experiments/exp_train_l/*
 
 # Transfer archives
 *.zip
+
+v4_package

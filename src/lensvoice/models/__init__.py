@@ -14,7 +14,7 @@ from lensvoice.models.interfaces import (
 )
 from lensvoice.models.mock_models import (
     MockDepthModel, MockOCRModel, MockSceneModel, MockTrafficSignModel,
-    MockVisionModel,
+    MockVisionModel, NullOCRModel, NullTrafficSignModel,
 )
 
 # Real adapters are imported lazily (their backend deps are optional).
@@ -27,9 +27,13 @@ def _build(name: str, cfg: ModelConfig, class_names: Dict[int, str]) -> object:
     if name == "yolo":
         return YOLOAdapter(cfg, class_names) if cfg.enabled else MockVisionModel(class_names)
     if name == "ocr":
-        return PaddleOCRAdapter(cfg) if cfg.enabled else MockOCRModel()
+        if cfg.enabled:
+            return PaddleOCRAdapter(cfg)
+        return MockOCRModel() if cfg.mock else NullOCRModel()
     if name == "traffic_sign":
-        return TrafficSignAdapter(cfg) if cfg.enabled else MockTrafficSignModel()
+        if cfg.enabled:
+            return TrafficSignAdapter(cfg)
+        return MockTrafficSignModel() if cfg.mock else NullTrafficSignModel()
     if name == "depth":
         from lensvoice.models.depth_adapter import DepthAdapter
         return DepthAdapter(cfg) if cfg.enabled else MockDepthModel()

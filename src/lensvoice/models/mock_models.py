@@ -87,7 +87,21 @@ class MockSceneModel(SceneModel):
                            timestamp=frame.timestamp)
 
 
+class NullOCRModel(OCRModel):
+    """Reports no text (a live run must not speak canned mock text)."""
+
+    def read(self, frame: Frame) -> list[OCRResult]:
+        return []
+
+
+class NullTrafficSignModel(TrafficSignModel):
+    """Reports no signs (a live run must not announce canned mock signs)."""
+
+    def detect(self, frame: Frame) -> list[TrafficSignResult]:
+        return []
+
+
 __all__ = [
     "MockVisionModel", "MockOCRModel", "MockTrafficSignModel",
-    "MockDepthModel", "MockSceneModel",
+    "MockDepthModel", "MockSceneModel", "NullOCRModel", "NullTrafficSignModel",
 ]

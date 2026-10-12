@@ -24,11 +24,11 @@ def test_vertical_zones():
 
 
 def test_depth_buckets():
-    # depth of 0.05 folds into very_near (bin 0.15)
-    assert SA.depth_of(np.full((10, 10), 0.05), BBox(1, 1, 6, 6)) == "very_near"
-    assert SA.depth_of(np.full((10, 10), 0.25), BBox(1, 1, 6, 6)) == "near"
-    assert SA.depth_of(np.full((10, 10), 0.45), BBox(1, 1, 6, 6)) == "medium"
-    assert SA.depth_of(np.full((10, 10), 0.99), BBox(1, 1, 6, 6)) == "far"
+    # depth contract: 1.0 = closest. closeness 0.95 -> distance 0.05 -> very_near (bin 0.15)
+    assert SA.depth_of(np.full((10, 10), 0.95), BBox(1, 1, 6, 6)) == "very_near"
+    assert SA.depth_of(np.full((10, 10), 0.75), BBox(1, 1, 6, 6)) == "near"
+    assert SA.depth_of(np.full((10, 10), 0.55), BBox(1, 1, 6, 6)) == "medium"
+    assert SA.depth_of(np.full((10, 10), 0.01), BBox(1, 1, 6, 6)) == "far"
 
 
 def test_depth_none():
@@ -36,7 +36,7 @@ def test_depth_none():
 
 
 def test_classify_integrates():
-    depth = np.full((100, 100), 0.02)
+    depth = np.full((100, 100), 0.98)   # 1.0 = closest
     info = SA.classify(BBox(35, 10, 65, 30), width=100, height=100, depth=depth)
     assert info.h_zone == "center"
     assert info.distance == "very_near"
